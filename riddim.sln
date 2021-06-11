@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31313.79
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Riddim", "riddim\Riddim.csproj", "{73B56467-26DD-4C40-9831-7EB61D3917FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Riddim", "riddim\Riddim.csproj", "{73B56467-26DD-4C40-9831-7EB61D3917FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

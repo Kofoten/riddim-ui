@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,9 +22,11 @@ namespace Riddim
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<RoomGeneratorServiceOptions>(options => options.Count = 25);
+            services.AddDbContext<RiddimDbContext>(optionsBuilder =>
+            {
+                optionsBuilder.UseNpgsql(Configuration.GetConnectionString("Database"));
+            });
 
-            services.AddSingleton<RoomGeneratorService>();
             services.AddControllersWithViews();
 
             // In production, the React files will be served from this directory
