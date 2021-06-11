@@ -6,7 +6,7 @@ namespace Riddim.Data.Domain
     public class Room
     {
         public Guid Id { get; set; }
-        public string Name { get; init; }
+        public string Name { get; set; }
         public string Description { get; set; }
         public Uri ImageUrl { get; set; }
 

@@ -6,24 +6,27 @@ import { converToQueryString } from '../common/queryHelper';
 import { ReduxFetchState } from '../common/reduxFetchState';
 import PageResult from '../entities/pageResult';
 import RoomMetadata from '../entities/roomMetadata';
-import RoomSettings from '../entities/roomSettings';
+import Room from '../entities/room';
 
 // STATE
 export interface RoomState {
     list: ReduxFetchState<PageResult<RoomMetadata>> | null,
-    settings: { [key: string]: ReduxFetchState<RoomSettings> }
+    roomCache: { [key: string]: ReduxFetchState<Room> }
+    slugLookup: { [key: string]: ReduxFetchState<string> }
 }
 
 // ACTIONS
 interface GetRoomList { type: 'GET_ROOM_LIST', fetchState: ReduxFetchState<PageResult<RoomMetadata>> };
-interface GetRoomSettings { type: 'GET_ROOM_SETTINGS', slug: string, fetchState: ReduxFetchState<RoomSettings> };
+interface GetRoomBySlug { type: 'GET_ROOM_BY_SLUG', slug: string, fetchState: ReduxFetchState<Room> };
+interface GetRoom { type: 'GET_ROOM', id: string, fetchState: ReduxFetchState<Room> };
 
-export type RoomAction = GetRoomList | GetRoomSettings;
+export type RoomAction = GetRoomList | GetRoomBySlug | GetRoom ;
 
 // INITIAL STATE
 const INITIAL_STATE: RoomState = {
     list: null,
-    settings: {}
+    roomCache: {},
+    slugLookup: {}
 }
 
 // ACTION CREATORS
@@ -40,25 +43,38 @@ export const actionCreators = {
         }
 
         try {
-            var response = await jsonFetch<PageResult<RoomMetadata>>(`${window.location.origin}/api/room`);
+            var response = await jsonFetch<PageResult<RoomMetadata>>(`${window.location.origin}/api/room${query}`);
             dispatch({ type: 'GET_ROOM_LIST', fetchState: { status: 'COMPLETE', data: response.jsonData } })
         } catch (error) {
             dispatch({ type: 'GET_ROOM_LIST', fetchState: { status: 'ERROR', error } })
         }
     },
-    getSettings: (slug: string) => async (dispatch: Dispatch<RoomAction>, getState: () => ApplicationState) => {
+    getBySlug: (slug: string) => async (dispatch: Dispatch<RoomAction>, getState: () => ApplicationState) => {
         const state = getState();
-        if (!state.room || !state.room.settings[slug]) {
-            dispatch({ type: 'GET_ROOM_SETTINGS', slug, fetchState: { status: 'PENDING' } })
+        if (!state.room || !state.room.slugLookup[slug]) {
+            dispatch({ type: 'GET_ROOM_BY_SLUG', slug, fetchState: { status: 'PENDING' } })
         }
 
         try {
-            var response = await jsonFetch<RoomSettings>(`${window.location.origin}/api/room/${slug}`);
-            dispatch({ type: 'GET_ROOM_SETTINGS', slug, fetchState: { status: 'COMPLETE', data: response.jsonData } })
+            var response = await jsonFetch<Room>(`${window.location.origin}/api/room/${slug}`);
+            dispatch({ type: 'GET_ROOM_BY_SLUG', slug, fetchState: { status: 'COMPLETE', data: response.jsonData } })
         } catch (error) {
-            dispatch({ type: 'GET_ROOM_SETTINGS', slug, fetchState: { status: 'ERROR', error } })
+            dispatch({ type: 'GET_ROOM_BY_SLUG', slug, fetchState: { status: 'ERROR', error } })
         }
-    }
+    },
+    get: (id: string, dispatchPending: boolean = false) => async (dispatch: Dispatch<RoomAction>, getState: () => ApplicationState) => {
+        const state = getState();
+        if (dispatchPending || !state.room || !state.room.roomCache[id]) {
+            dispatch({ type: 'GET_ROOM', id, fetchState: { status: 'PENDING' } })
+        }
+
+        try {
+            var response = await jsonFetch<Room>(`${window.location.origin}/api/room/${id}`);
+            dispatch({ type: 'GET_ROOM', id, fetchState: { status: 'COMPLETE', data: response.jsonData } })
+        } catch (error) {
+            dispatch({ type: 'GET_ROOM', id, fetchState: { status: 'ERROR', error } })
+        }
+    },
 };
 
 // REDUCER
@@ -69,25 +85,44 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
                 ...state,
                 list: action.fetchState
             }
-        case 'GET_ROOM_SETTINGS':
+        case 'GET_ROOM_BY_SLUG':
             switch (action.fetchState.status) {
                 case 'COMPLETE':
                     return {
                         ...state,
-                        settings: {
-                            ...state.settings,
-                            [action.slug]: action.fetchState,
-                            [action.fetchState.data.slug]: action.fetchState
+                        roomCache: {
+                            ...state.roomCache,
+                            [action.fetchState.data.id]: action.fetchState
+                        },
+                        slugLookup: {
+                            ...state.slugLookup,
+                            [action.slug]: { status: 'COMPLETE', data: action.fetchState.data.id }
                         }
                     }
-                default:
+                case 'PENDING':
                     return {
                         ...state,
-                        settings: {
-                            ...state.settings,
-                            [action.slug]: action.fetchState,
+                        slugLookup: {
+                            ...state.slugLookup,
+                            [action.slug]: { status: 'PENDING' }
                         }
                     }
+                case 'ERROR':
+                    return {
+                        ...state,
+                        slugLookup: {
+                            ...state.slugLookup,
+                            [action.slug]: { status: 'ERROR', error: action.fetchState.error }
+                        }
+                    }
+            }
+        case 'GET_ROOM':
+            return {
+                ...state,
+                roomCache: {
+                    ...state.roomCache,
+                    [action.id]: action.fetchState
+                }
             }
         default:
             return state;
@@ -97,5 +132,6 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
 // SELECTORS
 export const selectors = {
     list: (state: { room: RoomState }) => state.room.list,
-    settings: (state: { room: RoomState }) => state.room.settings
+    roomCache: (state: { room: RoomState }) => state.room.roomCache,
+    slugLookup: (state: { room: RoomState }) => state.room.slugLookup,
 }

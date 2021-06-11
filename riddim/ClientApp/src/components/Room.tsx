@@ -3,24 +3,34 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { ApplicationDispatch } from '../store';
 import * as RoomStore from '../store/RoomStore';
+import LoadingAnimation from './LoadingAnimation';
 
 const Room: FC<RouteComponentProps<{ slug: string }>> = (props) => {
-    const settings = useSelector(RoomStore.selectors.settings)[props.match.params.slug];
+    const roomId = useSelector(RoomStore.selectors.slugLookup)[props.match.params.slug];
+    const roomCache = useSelector(RoomStore.selectors.roomCache);
     const dispatch: ApplicationDispatch = useDispatch();
     useEffect(() => {
-        if (!settings) {
-            dispatch(RoomStore.actionCreators.getSettings(props.match.params.slug));
+        if (!roomId) {
+            dispatch(RoomStore.actionCreators.getBySlug(props.match.params.slug));
         }
-    }, [dispatch, props.match.params.slug, settings]);
+    }, [dispatch, props.match.params.slug, roomId, roomCache]);
 
-    if (settings) {
-        switch (settings.status) {
+    if (roomId) {
+        switch (roomId.status) {
             case 'PENDING':
-                return <p>Loading...</p>
+                return <LoadingAnimation/>
             case 'COMPLETE':
-                return <p>{settings.data.name}</p>
+                const room = roomCache[roomId.data];
+                switch (room.status) {
+                    case 'PENDING':
+                        return <LoadingAnimation />
+                    case 'COMPLETE':
+                        return <p>{room.data.name}</p>
+                    case 'ERROR':
+                        return <p>{room.error.message}</p>
+                }
             case 'ERROR':
-                return <p>{settings.error.message}</p>
+                return <p>{roomId.error.message}</p>
         }
     }
 

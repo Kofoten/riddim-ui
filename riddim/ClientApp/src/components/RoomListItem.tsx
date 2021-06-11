@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import RoomMetadata from "../entities/roomMetadata";
 import { RoomListItemLayout, RoomListItemImage, RoomListItemText } from "../ui/RoomListComponents";
 
-export interface RoomListItemProps { item: RoomMetadata }
+export interface RoomListItemProps {
+    item: RoomMetadata
+}
 
 const RoomListItem: FC<RoomListItemProps> = (props) => {
     return <Link to={`/${props.item.slug}`}>

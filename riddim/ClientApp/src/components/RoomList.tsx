@@ -6,7 +6,7 @@ import { RoomListLayout } from "../ui/RoomListComponents";
 import LoadingAnimation from "./LoadingAnimation";
 import RoomListItem from "./RoomListItem";
 
-const RoomList: FC = (props) => {
+const RoomList: FC = () => {
     const dispatch: ApplicationDispatch = useDispatch();
     useEffect(() => {
         dispatch(RoomStore.actionCreators.getList())

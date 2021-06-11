@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Riddim.Services;
-using Riddim.Services.Options;
 
 namespace Riddim
 {
