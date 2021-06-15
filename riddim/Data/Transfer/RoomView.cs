@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Riddim.Data.Transfer
 {
-    public record RoomSettings
+    public record RoomView
     {
         public Guid Id { get; init; }
         public string Name { get; init; }

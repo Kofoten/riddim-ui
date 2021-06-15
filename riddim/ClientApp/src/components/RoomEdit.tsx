@@ -20,7 +20,7 @@ const RoomEdit: FC<RouteComponentProps<{ id: string }>> = (props) => {
             case 'PENDING':
                 return <LoadingAnimation />
             case 'COMPLETE':
-                return <RoomEditForm mode="EDIT" room={room.data} />
+                return <RoomEditForm mode="EDIT" id={props.match.params.id} room={room.data} />
             case 'ERROR':
                 return <p>{room.error.message}</p>
         }

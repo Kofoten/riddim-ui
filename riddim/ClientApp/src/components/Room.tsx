@@ -18,7 +18,7 @@ const Room: FC<RouteComponentProps<{ slug: string }>> = (props) => {
     if (roomId) {
         switch (roomId.status) {
             case 'PENDING':
-                return <LoadingAnimation/>
+                return <LoadingAnimation />
             case 'COMPLETE':
                 const room = roomCache[roomId.data];
                 switch (room.status) {

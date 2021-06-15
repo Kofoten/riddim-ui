@@ -2,8 +2,8 @@
     jsonData: TData
 }
 
-const jsonFetch = async <TData>(request: RequestInfo): Promise<JsonResponse<TData>> => {
-    var response = await fetch(request);
+const jsonFetch = async <TData>(request: RequestInfo, init?: RequestInit): Promise<JsonResponse<TData>> => {
+    var response = await fetch(request, init);
     var jsonData = await response.json() as TData;
 
     return {

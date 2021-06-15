@@ -10,9 +10,10 @@ export default () => (
     <Layout>
         <Switch>
             <Route exact path='/' component={Home} />
-            <Route path='/:slug' component={Room} />
-            <Route path='/room/create' componenet={RoomCreate} />
-            <Route path='/room/edit/:id' componenet={RoomEdit} />
+            <Route exact path='/:slug' component={Room} />
+            <Route exact path='/room/create' component={RoomCreate} />
+            <Route exact path='/room/edit/:id' component={RoomEdit} />
+            <Route><h1>404</h1></Route>
         </Switch>
     </Layout>
 );

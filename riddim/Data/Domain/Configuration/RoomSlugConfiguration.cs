@@ -29,6 +29,11 @@ namespace Riddim.Data.Domain.Configuration
                 .HasColumnName("slug");
 
             builder
+                .Property(x => x.AddedAt)
+                .IsRequired()
+                .HasColumnName("added_at");
+
+            builder
                 .HasKey(x => x.Id)
                 .HasName("pk_roomslug");
 

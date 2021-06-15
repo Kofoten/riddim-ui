@@ -8,6 +8,7 @@ namespace Riddim.Data.Domain
         public Guid RoomId { get; set; }
         public bool Primary { get; set; }
         public string Slug { get; set; }
+        public DateTimeOffset AddedAt { get; set; }
 
         public Room Room { get; set; }
     }

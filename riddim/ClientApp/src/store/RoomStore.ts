@@ -7,6 +7,7 @@ import { ReduxFetchState } from '../common/reduxFetchState';
 import PageResult from '../entities/pageResult';
 import RoomMetadata from '../entities/roomMetadata';
 import Room from '../entities/room';
+import RoomUpdate from '../entities/roomUpdate';
 
 // STATE
 export interface RoomState {
@@ -19,8 +20,10 @@ export interface RoomState {
 interface GetRoomList { type: 'GET_ROOM_LIST', fetchState: ReduxFetchState<PageResult<RoomMetadata>> };
 interface GetRoomBySlug { type: 'GET_ROOM_BY_SLUG', slug: string, fetchState: ReduxFetchState<Room> };
 interface GetRoom { type: 'GET_ROOM', id: string, fetchState: ReduxFetchState<Room> };
+interface CreateRoom { type: 'CREATE_ROOM', fetchState: ReduxFetchState<Room> };
+interface EditRoom { type: 'EDIT_ROOM', fetchState: ReduxFetchState<Room> };
 
-export type RoomAction = GetRoomList | GetRoomBySlug | GetRoom ;
+export type RoomAction = GetRoomList | GetRoomBySlug | GetRoom | CreateRoom | EditRoom;
 
 // INITIAL STATE
 const INITIAL_STATE: RoomState = {
@@ -69,12 +72,44 @@ export const actionCreators = {
         }
 
         try {
-            var response = await jsonFetch<Room>(`${window.location.origin}/api/room/${id}`);
+            var response = await jsonFetch<Room>(`${window.location.origin}/api/room/${id}?keyType=id`);
             dispatch({ type: 'GET_ROOM', id, fetchState: { status: 'COMPLETE', data: response.jsonData } })
         } catch (error) {
             dispatch({ type: 'GET_ROOM', id, fetchState: { status: 'ERROR', error } })
         }
     },
+    create: (data: RoomUpdate) => async (dispatch: Dispatch<RoomAction>) => {
+        dispatch({ type: 'CREATE_ROOM', fetchState: { status: 'PENDING' } });
+
+        try {
+            var response = await jsonFetch<Room>(`${window.location.origin}/api/room`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            dispatch({ type: 'CREATE_ROOM', fetchState: { status: 'COMPLETE', data: response.jsonData } });
+        } catch (error) {
+            dispatch({ type: 'CREATE_ROOM', fetchState: { status: 'ERROR', error } });
+        }
+    },
+    edit: (id: string, data: RoomUpdate) => async (dispatch: Dispatch<RoomAction>) => {
+        dispatch({ type: 'EDIT_ROOM', fetchState: { status: 'PENDING' } });
+
+        try {
+            var response = await jsonFetch<Room>(`${window.location.origin}/api/room/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            dispatch({ type: 'EDIT_ROOM', fetchState: { status: 'COMPLETE', data: response.jsonData } });
+        } catch (error) {
+            dispatch({ type: 'EDIT_ROOM', fetchState: { status: 'ERROR', error } });
+        }
+    }
 };
 
 // REDUCER
@@ -115,6 +150,40 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
                             [action.slug]: { status: 'ERROR', error: action.fetchState.error }
                         }
                     }
+            }
+        case 'CREATE_ROOM':
+            switch (action.fetchState.status) {
+                case 'COMPLETE':
+                    return {
+                        ...state,
+                        roomCache: {
+                            ...state.roomCache,
+                            [action.fetchState.data.id]: action.fetchState
+                        },
+                        slugLookup: {
+                            ...state.slugLookup,
+                            [action.fetchState.data.slug]: { status: 'COMPLETE', data: action.fetchState.data.id }
+                        }
+                    }
+                default:
+                    return state;
+            }
+        case 'EDIT_ROOM':
+            switch (action.fetchState.status) {
+                case 'COMPLETE':
+                    return {
+                        ...state,
+                        roomCache: {
+                            ...state.roomCache,
+                            [action.fetchState.data.id]: action.fetchState
+                        },
+                        slugLookup: {
+                            ...state.slugLookup,
+                            [action.fetchState.data.slug]: { status: 'COMPLETE', data: action.fetchState.data.id }
+                        }
+                    }
+                default:
+                    return state;
             }
         case 'GET_ROOM':
             return {
