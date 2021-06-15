@@ -6,8 +6,7 @@ import { converToQueryString } from '../common/queryHelper';
 import { ReduxFetchState } from '../common/reduxFetchState';
 import PageResult from '../entities/pageResult';
 import RoomMetadata from '../entities/roomMetadata';
-import Room from '../entities/room';
-import RoomUpdate from '../entities/roomUpdate';
+import Room, { RoomUpdate } from '../entities/room';
 
 // STATE
 export interface RoomState {

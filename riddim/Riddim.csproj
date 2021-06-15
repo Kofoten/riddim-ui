@@ -6,6 +6,7 @@
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <TypeScriptNoEmit>true</TypeScriptNoEmit>
     <TypeScriptTarget>es2018</TypeScriptTarget>
+    <TypeScriptSkipLibCheck>true</TypeScriptSkipLibCheck>
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>

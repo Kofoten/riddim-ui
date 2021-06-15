@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Riddim.Data;
 using Riddim.Data.Domain;
 using Riddim.Data.Transfer;
@@ -18,12 +17,10 @@ namespace Riddim.Controllers
     public class RoomController : ControllerBase
     {
         private readonly RiddimDbContext context;
-        private readonly ILogger logger;
 
-        public RoomController(RiddimDbContext context, ILogger<RoomController> logger)
+        public RoomController(RiddimDbContext context)
         {
             this.context = context;
-            this.logger = logger;
         }
 
         [HttpGet]
@@ -62,22 +59,19 @@ namespace Riddim.Controllers
                 keyType = "SLUG";
             }
 
-            switch (keyType.ToUpper())
+            return keyType.ToUpper() switch
             {
-                case "SLUG":
-                    return await GetBySlug(key);
-                case "ID":
-                    return await GetById(key);
-                default:
-                    return BadRequest();
-            }
+                "SLUG" => await GetBySlug(key),
+                "ID" => await GetById(key),
+                _ => BadRequest(ErrorObject.InvalidKeyType),
+            };
         }
 
         private async Task<ActionResult<RoomView>> GetById(string key)
         {
             if (!Guid.TryParse(key, out var id))
             {
-                return BadRequest();
+                return BadRequest(ErrorObject.InvalidIdFormat);
             }
 
             var room = await context.Rooms
@@ -187,7 +181,7 @@ namespace Riddim.Controllers
 
             if (!string.IsNullOrEmpty(roomUpdate.Name))
             {
-                if (await context.Rooms.Where(x => x.Name == roomUpdate.Name).AnyAsync())
+                if (await context.Rooms.Where(x => x.Name == roomUpdate.Name && x.Id != room.Id).AnyAsync())
                 {
                     return Conflict(ErrorObject.UnavailableRoomName);
                 }

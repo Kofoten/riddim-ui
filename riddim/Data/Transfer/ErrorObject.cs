@@ -40,5 +40,17 @@
             Code = "RoomNotFound",
             Description = "The room could not be found"
         };
+
+        public static ErrorObject InvalidKeyType => new()
+        {
+            Code = "InvalidKeyType",
+            Description = "The key type is invalid"
+        };
+
+        public static ErrorObject InvalidIdFormat => new()
+        {
+            Code = "InvalidIdFormat",
+            Description = "The format of the id is invalid"
+        };
     }
 }

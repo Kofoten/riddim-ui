@@ -5,8 +5,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import * as RoomStore from '../store/RoomStore';
-import Room from '../entities/room';
-import RoomUpdate from '../entities/roomUpdate';
+import Room, { RoomUpdate } from '../entities/room';
 
 interface RoomEditFormCreateProps {
     mode: 'CREATE'

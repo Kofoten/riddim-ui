@@ -16,7 +16,7 @@
       "es2018",
       "dom"
     ],
-    "skipLibCheck": false
+    "skipLibCheck": true
   },
   "include": [
     "src"

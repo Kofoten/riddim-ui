@@ -24,6 +24,7 @@ export const RoomListItemImage = styled.img`
     height: 5rem;
     width: 5rem;
     border-radius: .5rem 0 0 .5rem;
+    object-fit: cover;
 `
 
 export const RoomListItemText = styled.div`
