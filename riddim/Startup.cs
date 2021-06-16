@@ -1,3 +1,4 @@
+using EntityFramework.Exceptions.PostgreSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -23,6 +24,7 @@ namespace Riddim
         {
             services.AddDbContext<RiddimDbContext>(optionsBuilder =>
             {
+                optionsBuilder.UseExceptionProcessor();
                 optionsBuilder.UseNpgsql(Configuration.GetConnectionString("Database"));
             });
 

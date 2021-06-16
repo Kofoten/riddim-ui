@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EntityFramework.Exceptions.Common;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Riddim.Data;
 using Riddim.Data.Domain;
 using Riddim.Data.Transfer;
@@ -132,16 +134,6 @@ namespace Riddim.Controllers
                 return BadRequest(ErrorObject.InvalidRoomSlug);
             }
 
-            if (await context.Rooms.Where(x => x.Name == roomUpdate.Name).AnyAsync())
-            {
-                return Conflict(ErrorObject.UnavailableRoomName);
-            }
-
-            if (await context.RoomSlugs.Where(x => x.Slug == roomUpdate.Slug).AnyAsync())
-            {
-                return Conflict(ErrorObject.UnavailableRoomSlug);
-            }
-
             var room = context.Rooms.Add(new Room
             {
                 Name = roomUpdate.Name,
@@ -158,7 +150,15 @@ namespace Riddim.Controllers
                 }
             });
 
-            await context.SaveChangesAsync();
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (UniqueConstraintException e)
+            {
+                return Conflict(CreateUniqueConstraintViolationErrorObject(e));
+            }
+
             return Ok(new RoomView
             {
                 Id = room.Entity.Id,
@@ -181,11 +181,6 @@ namespace Riddim.Controllers
 
             if (!string.IsNullOrEmpty(roomUpdate.Name))
             {
-                if (await context.Rooms.Where(x => x.Name == roomUpdate.Name && x.Id != room.Id).AnyAsync())
-                {
-                    return Conflict(ErrorObject.UnavailableRoomName);
-                }
-
                 room.Name = roomUpdate.Name;
             }
 
@@ -194,11 +189,6 @@ namespace Riddim.Controllers
                 if (!SlugHelper.ValidateSlug(roomUpdate.Slug))
                 {
                     return BadRequest(ErrorObject.InvalidRoomSlug);
-                }
-
-                if (await context.RoomSlugs.Where(x => x.Slug == roomUpdate.Slug && x.RoomId != room.Id).AnyAsync())
-                {
-                    return Conflict(ErrorObject.UnavailableRoomSlug);
                 }
 
                 var primaryRoomSlugFound = false;
@@ -246,7 +236,15 @@ namespace Riddim.Controllers
                 room.ImageUrl = roomUpdate.ImageUrl;
             }
 
-            await context.SaveChangesAsync();
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (UniqueConstraintException e)
+            {
+                return Conflict(CreateUniqueConstraintViolationErrorObject(e));
+            }
+
             return Ok(new RoomView
             {
                 Id = room.Id,
@@ -255,6 +253,25 @@ namespace Riddim.Controllers
                 ImageUrl = room.ImageUrl,
                 Slug = room.Slugs.First(x => x.Primary).Slug
             });
+        }
+
+        private ErrorObject CreateUniqueConstraintViolationErrorObject(UniqueConstraintException exception)
+        {
+            if (exception.InnerException is object)
+            {
+                return exception.InnerException switch
+                {
+                    PostgresException => (exception.InnerException as PostgresException).TableName switch
+                    {
+                        "rooms" => ErrorObject.UnavailableRoomName,
+                        "roomslugs" => ErrorObject.UnavailableRoomSlug,
+                        _ => ErrorObject.UnexpectedDatabaseConflict
+                    },
+                    _ => ErrorObject.UnexpectedDatabaseConflict
+                };
+            }
+
+            return ErrorObject.UnexpectedDatabaseConflict;
         }
 
         [HttpDelete]

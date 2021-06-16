@@ -52,5 +52,11 @@
             Code = "InvalidIdFormat",
             Description = "The format of the id is invalid"
         };
+
+        public static ErrorObject UnexpectedDatabaseConflict => new()
+        {
+            Code = "UnexpectedDatabaseConflict",
+            Description = "An unexpected conflict occurred in the database"
+        };
     }
 }
