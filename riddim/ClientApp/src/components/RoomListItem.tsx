@@ -1,10 +1,10 @@
 import React, { FC } from "react";
 import { Link } from "react-router-dom";
-import RoomMetadata from "../entities/roomMetadata";
+import Room from "../entities/room";
 import { RoomListItemLayout, RoomListItemImage, RoomListItemText } from "../ui/RoomListComponents";
 
 export interface RoomListItemProps {
-    item: RoomMetadata
+    item: Room
 }
 
 const RoomListItem: FC<RoomListItemProps> = (props) => {

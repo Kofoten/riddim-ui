@@ -5,39 +5,38 @@ import PagedSearchQuery from '../common/pagedSearchQuery';
 import { converToQueryString } from '../common/queryHelper';
 import { ReduxFetchState } from '../common/reduxFetchState';
 import PageResult from '../entities/pageResult';
-import RoomMetadata from '../entities/roomMetadata';
 import Room, { RoomUpdate } from '../entities/room';
 
 // STATE
+export interface RoomCache { [key: string]: ReduxFetchState<Room> };
+export interface SlugLookup { [key: string]: ReduxFetchState<string> };
+
 export interface RoomState {
-    list: ReduxFetchState<PageResult<RoomMetadata>> | null,
-    roomCache: { [key: string]: ReduxFetchState<Room> }
-    slugLookup: { [key: string]: ReduxFetchState<string> }
+    status: 'PENDING' | 'COMPLETE'| 'ERROR' | 'NONE',
+    roomCache: RoomCache,
+    slugLookup: SlugLookup
 }
 
 // ACTIONS
-interface GetRoomList { type: 'GET_ROOM_LIST', fetchState: ReduxFetchState<PageResult<RoomMetadata>> };
+interface GetRooms { type: 'GET_ROOMS', fetchState: ReduxFetchState<PageResult<Room>> };
 interface GetRoomBySlug { type: 'GET_ROOM_BY_SLUG', slug: string, fetchState: ReduxFetchState<Room> };
 interface GetRoom { type: 'GET_ROOM', id: string, fetchState: ReduxFetchState<Room> };
 interface CreateRoom { type: 'CREATE_ROOM', fetchState: ReduxFetchState<Room> };
 interface EditRoom { type: 'EDIT_ROOM', fetchState: ReduxFetchState<Room> };
 
-export type RoomAction = GetRoomList | GetRoomBySlug | GetRoom | CreateRoom | EditRoom;
+export type RoomAction = GetRooms | GetRoomBySlug | GetRoom | CreateRoom | EditRoom;
 
 // INITIAL STATE
 const INITIAL_STATE: RoomState = {
-    list: null,
+    status: 'NONE',
     roomCache: {},
     slugLookup: {}
 }
 
 // ACTION CREATORS
 export const actionCreators = {
-    getList: (pagedSearchQuery?: PagedSearchQuery) => async (dispatch: Dispatch<RoomAction>, getState: () => ApplicationState) => {
-        const state = getState();
-        if (!state.room || !state.room.list) {
-            dispatch({ type: 'GET_ROOM_LIST', fetchState: { status: 'PENDING' } })
-        }
+    getList: (pagedSearchQuery?: PagedSearchQuery) => async (dispatch: Dispatch<RoomAction>) => {
+        dispatch({ type: 'GET_ROOMS', fetchState: { status: 'PENDING' } })
 
         let query = '';
         if (pagedSearchQuery) {
@@ -45,10 +44,10 @@ export const actionCreators = {
         }
 
         try {
-            var response = await jsonFetch<PageResult<RoomMetadata>>(`${window.location.origin}/api/room${query}`);
-            dispatch({ type: 'GET_ROOM_LIST', fetchState: { status: 'COMPLETE', data: response.jsonData } })
+            var response = await jsonFetch<PageResult<Room>>(`${window.location.origin}/api/room${query}`);
+            dispatch({ type: 'GET_ROOMS', fetchState: { status: 'COMPLETE', data: response.jsonData } })
         } catch (error) {
-            dispatch({ type: 'GET_ROOM_LIST', fetchState: { status: 'ERROR', error } })
+            dispatch({ type: 'GET_ROOMS', fetchState: { status: 'ERROR', error } })
         }
     },
     getBySlug: (slug: string) => async (dispatch: Dispatch<RoomAction>, getState: () => ApplicationState) => {
@@ -112,18 +111,34 @@ export const actionCreators = {
 };
 
 // REDUCER
+const roomCacheReducer = (cache: RoomCache, room: Room): RoomCache => ({ ...cache, [room.id]: { status: 'COMPLETE', data: room } })
+
 export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, action): RoomState => {
     switch (action.type) {
-        case 'GET_ROOM_LIST':
-            return {
-                ...state,
-                list: action.fetchState
+        case 'GET_ROOMS':
+            switch (action.fetchState.status) {
+                case 'COMPLETE':
+                    const roomCacheAdd = action.fetchState.data.items.reduce<RoomCache>(roomCacheReducer, {});
+                    return {
+                        ...state,
+                        status: action.fetchState.status,
+                        roomCache: {
+                            ...state.roomCache,
+                            ...roomCacheAdd
+                        },
+                    }
+                default:
+                    return {
+                        ...state,
+                        status: action.fetchState.status
+                    };
             }
         case 'GET_ROOM_BY_SLUG':
             switch (action.fetchState.status) {
                 case 'COMPLETE':
                     return {
                         ...state,
+                        status: action.fetchState.status,
                         roomCache: {
                             ...state.roomCache,
                             [action.fetchState.data.id]: action.fetchState
@@ -136,6 +151,7 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
                 case 'PENDING':
                     return {
                         ...state,
+                        status: action.fetchState.status,
                         slugLookup: {
                             ...state.slugLookup,
                             [action.slug]: { status: 'PENDING' }
@@ -144,6 +160,7 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
                 case 'ERROR':
                     return {
                         ...state,
+                        status: action.fetchState.status,
                         slugLookup: {
                             ...state.slugLookup,
                             [action.slug]: { status: 'ERROR', error: action.fetchState.error }
@@ -155,6 +172,7 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
                 case 'COMPLETE':
                     return {
                         ...state,
+                        status: action.fetchState.status,
                         roomCache: {
                             ...state.roomCache,
                             [action.fetchState.data.id]: action.fetchState
@@ -165,13 +183,17 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
                         }
                     }
                 default:
-                    return state;
+                    return {
+                        ...state,
+                        status: action.fetchState.status
+                    };
             }
         case 'EDIT_ROOM':
             switch (action.fetchState.status) {
                 case 'COMPLETE':
                     return {
                         ...state,
+                        status: action.fetchState.status
                         roomCache: {
                             ...state.roomCache,
                             [action.fetchState.data.id]: action.fetchState
@@ -182,11 +204,15 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
                         }
                     }
                 default:
-                    return state;
+                    return {
+                        ...state,
+                        status: action.fetchState.status
+                    }
             }
         case 'GET_ROOM':
             return {
                 ...state,
+                status: action.fetchState.status,
                 roomCache: {
                     ...state.roomCache,
                     [action.id]: action.fetchState
@@ -199,7 +225,7 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
 
 // SELECTORS
 export const selectors = {
-    list: (state: { room: RoomState }) => state.room.list,
+    status: (state: { room: RoomState }) => state.room.status,
     roomCache: (state: { room: RoomState }) => state.room.roomCache,
     slugLookup: (state: { room: RoomState }) => state.room.slugLookup,
 }

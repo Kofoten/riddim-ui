@@ -1,4 +1,4 @@
-﻿namespace Riddim.Data.Transfer
+﻿namespace Riddim.Data.View
 {
     public class ErrorObject
     {

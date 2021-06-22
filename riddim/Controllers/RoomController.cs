@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Riddim.Data;
 using Riddim.Data.Domain;
-using Riddim.Data.Transfer;
+using Riddim.Data.View;
 using Riddim.Helpers;
 using Riddim.Services;
 using System;
@@ -26,24 +26,16 @@ namespace Riddim.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<PageResult<RoomMetadata>>> List([FromQuery] PagedSearchQuery query)
+        public async Task<ActionResult<PageResult<RoomView>>> List([FromQuery] PagedSearchQuery query)
         {
             var rooms = await context.Rooms
                 .Where(x => string.IsNullOrEmpty(query.Search) || x.Name.Contains(query.Search))
-                .OrderBy(x => x.Id)
                 .Skip(query.Page * query.PageSize)
                 .Take(query.PageSize + 1)
-                .Select(x => new RoomMetadata
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Slug = x.Slugs.First(y => y.Primary).Slug,
-                    Description = x.Description,
-                    ImageUrl = x.ImageUrl
-                })
+                .Select(RoomHelper.ToViewConverterExpression)
                 .ToListAsync();
 
-            return Ok(new PageResult<RoomMetadata>()
+            return Ok(new PageResult<RoomView>()
             {
                 Page = query.Page,
                 PageSize = query.PageSize,
@@ -85,14 +77,7 @@ namespace Riddim.Controllers
                 return NotFound(ErrorObject.RoomNotFound);
             }
 
-            return Ok(new RoomView
-            {
-                Id = room.Id,
-                Name = room.Name,
-                Slug = room.Slugs.First(x => x.Primary).Slug,
-                Description = room.Description,
-                ImageUrl = room.ImageUrl
-            });
+            return Ok(RoomHelper.ToView(room));
         }
 
         private async Task<ActionResult<RoomView>> GetBySlug(string slug)
@@ -106,14 +91,7 @@ namespace Riddim.Controllers
                 return NotFound(ErrorObject.RoomNotFound);
             }
 
-            return Ok(new RoomView
-            {
-                Id = roomSlug.Room.Id,
-                Name = roomSlug.Room.Name,
-                Slug = roomSlug.Slug,
-                Description = roomSlug.Room.Description,
-                ImageUrl = roomSlug.Room.ImageUrl
-            });
+            return Ok(RoomHelper.ToView(roomSlug.Room, roomSlug.Slug));
         }
 
         [HttpPost]
@@ -159,14 +137,7 @@ namespace Riddim.Controllers
                 return Conflict(CreateUniqueConstraintViolationErrorObject(e));
             }
 
-            return Ok(new RoomView
-            {
-                Id = room.Entity.Id,
-                Name = room.Entity.Name,
-                Description = room.Entity.Description,
-                ImageUrl = room.Entity.ImageUrl,
-                Slug = room.Entity.Slugs.First(x => x.Primary).Slug
-            });
+            return Ok(RoomHelper.ToView(room.Entity));
         }
 
         [HttpPatch]
@@ -245,33 +216,7 @@ namespace Riddim.Controllers
                 return Conflict(CreateUniqueConstraintViolationErrorObject(e));
             }
 
-            return Ok(new RoomView
-            {
-                Id = room.Id,
-                Name = room.Name,
-                Description = room.Description,
-                ImageUrl = room.ImageUrl,
-                Slug = room.Slugs.First(x => x.Primary).Slug
-            });
-        }
-
-        private ErrorObject CreateUniqueConstraintViolationErrorObject(UniqueConstraintException exception)
-        {
-            if (exception.InnerException is object)
-            {
-                return exception.InnerException switch
-                {
-                    PostgresException => (exception.InnerException as PostgresException).TableName switch
-                    {
-                        "rooms" => ErrorObject.UnavailableRoomName,
-                        "roomslugs" => ErrorObject.UnavailableRoomSlug,
-                        _ => ErrorObject.UnexpectedDatabaseConflict
-                    },
-                    _ => ErrorObject.UnexpectedDatabaseConflict
-                };
-            }
-
-            return ErrorObject.UnexpectedDatabaseConflict;
+            return Ok(RoomHelper.ToView(room));
         }
 
         [HttpDelete]
@@ -289,6 +234,25 @@ namespace Riddim.Controllers
             context.Rooms.Remove(room);
             await context.SaveChangesAsync();
             return NoContent();
+        }
+
+        private static ErrorObject CreateUniqueConstraintViolationErrorObject(UniqueConstraintException exception)
+        {
+            if (exception.InnerException is object)
+            {
+                return exception.InnerException switch
+                {
+                    PostgresException => (exception.InnerException as PostgresException).TableName switch
+                    {
+                        "rooms" => ErrorObject.UnavailableRoomName,
+                        "roomslugs" => ErrorObject.UnavailableRoomSlug,
+                        _ => ErrorObject.UnexpectedDatabaseConflict
+                    },
+                    _ => ErrorObject.UnexpectedDatabaseConflict
+                };
+            }
+
+            return ErrorObject.UnexpectedDatabaseConflict;
         }
     }
 }

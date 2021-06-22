@@ -25,7 +25,10 @@ const Room: FC<RouteComponentProps<{ slug: string }>> = (props) => {
                     case 'PENDING':
                         return <LoadingAnimation />
                     case 'COMPLETE':
-                        return <p>{room.data.name}</p>
+                        return <>
+                            <h1>{room.data.name}</h1>
+
+                        </>
                     case 'ERROR':
                         return <p>{room.error.message}</p>
                 }

@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Riddim.Data.Domain;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace Riddim.Data.Transfer
+namespace Riddim.Data.View
 {
-    public record RoomUpdate
+    public record RoomView
     {
+        public Guid Id { get; init; }
         public string Name { get; init; }
         public string Slug { get; init; }
         public string Description { get; init; }

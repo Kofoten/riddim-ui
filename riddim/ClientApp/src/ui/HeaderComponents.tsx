@@ -1,7 +1,7 @@
 ﻿import styled from 'styled-components';
 
 export const Header = styled.div`
-    background-color: green;
+    background-color: ${props => props.theme.accent};
 `
 
 export const HeaderTitle = styled.span`

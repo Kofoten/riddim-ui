@@ -13,17 +13,19 @@ export const RoomListItemLayout = styled.div`
     display: flex;
     flex-direction: row;
     flex-wrap: no-wrap;
-    background-color: white;
-    border: 1px solid lightgray;
-    border-radius: .5rem;
+    background-color: ${props => props.theme.primary};
+    border-radius: .15rem;
     max-height: 5rem;
     overflow: hidden;
+    transition: background-color .25s;
+    &:hover {
+        background-color: ${props => props.theme.variant};
+    }
 `
 
 export const RoomListItemImage = styled.img`
     height: 5rem;
     width: 5rem;
-    border-radius: .5rem 0 0 .5rem;
     object-fit: cover;
 `
 

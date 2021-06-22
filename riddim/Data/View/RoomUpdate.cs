@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Riddim.Data.Transfer
+namespace Riddim.Data.View
 {
-    public record RoomView
+    public record RoomUpdate
     {
-        public Guid Id { get; init; }
         public string Name { get; init; }
         public string Slug { get; init; }
         public string Description { get; init; }
