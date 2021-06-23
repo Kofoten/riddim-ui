@@ -7,6 +7,9 @@ export const SeoHeader = styled.h1`
 export const LogoWrapper = styled.div`
     display: block;
     width: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
     background-color: ${props => props.theme.secondary};
     font-family: 'Bungee Inline', cursive;
 `

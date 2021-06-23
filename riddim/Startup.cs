@@ -7,6 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Riddim.Services;
+using System;
+using System.Collections;
 
 namespace Riddim
 {
@@ -24,8 +26,22 @@ namespace Riddim
         {
             services.AddDbContext<RiddimDbContext>(optionsBuilder =>
             {
+                var vars = Environment.GetEnvironmentVariables();
+
+                foreach(DictionaryEntry entry in vars) {
+                    Console.WriteLine($"{entry.Key}: {entry.Value}");
+                }
+
+                var connectionString = Configuration.GetConnectionString("Database");
+
+                if (string.IsNullOrEmpty(connectionString)) {
+                    connectionString = Configuration.GetValue<string>("RIDDIM_DB_CONNECTION_STRING");
+                }
+
+                Console.WriteLine(connectionString);
+
                 optionsBuilder.UseExceptionProcessor();
-                optionsBuilder.UseNpgsql(Configuration.GetConnectionString("Database"));
+                optionsBuilder.UseNpgsql(connectionString);
             });
 
             services.AddControllersWithViews();

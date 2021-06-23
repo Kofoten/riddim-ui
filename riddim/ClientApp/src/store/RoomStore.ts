@@ -193,7 +193,7 @@ export const reducer: Reducer<RoomState, RoomAction> = (state = INITIAL_STATE, a
                 case 'COMPLETE':
                     return {
                         ...state,
-                        status: action.fetchState.status
+                        status: action.fetchState.status,
                         roomCache: {
                             ...state.roomCache,
                             [action.fetchState.data.id]: action.fetchState

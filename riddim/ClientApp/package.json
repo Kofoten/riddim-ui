@@ -6,6 +6,8 @@
     "@hookform/resolvers": "^2.5.2",
     "bootstrap": "^4.3.1",
     "connected-react-router": "6.5.2",
+    "createjs-module": "^0.8.3",
+    "gsap": "^3.7.0",
     "history": "4.10.1",
     "jquery": "^3.5.1",
     "merge": "1.2.1",
@@ -25,6 +27,8 @@
     "yup": "^0.32.9"
   },
   "devDependencies": {
+    "@types/createjs": "0.0.29",
+    "@types/gsap": "^3.0.0",
     "@types/history": "4.7.3",
     "@types/jest": "24.0.19",
     "@types/node": "12.11.6",

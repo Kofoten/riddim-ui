@@ -13,7 +13,7 @@ const RoomList: FC = () => {
     const loader = useRef(null);
     useEffect(() => {
         dispatch(RoomStore.actionCreators.getList())
-    }, [dispatch, roomCache]);
+    }, [dispatch]);
 
     const rooms = Object.values(roomCache);
     if (rooms.length === 0) {
