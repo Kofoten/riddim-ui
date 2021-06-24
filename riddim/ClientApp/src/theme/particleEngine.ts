@@ -68,15 +68,19 @@ class ParticleEngine {
     private particleSettings: ParticleSettings[];
     private lights: Ellipse[];
     private particles: Particle[];
+    private width: number;
+    private height: number;
 
     constructor(canvas: HTMLCanvasElement) {
-        this.canvas = canvas; // document.getElementById(canvasId) as HTMLCanvasElement;
+        this.canvas = canvas;
+        this.width = this.canvas.width = this.canvas.offsetWidth;
+        this.height = this.canvas.height = this.canvas.offsetHeight;
         this.stage = new createjs.Stage(this.canvas);
         this.compositeStyle = 'lighter';
         this.particleSettings = [
-            {id: 'small', count: 300, fromX: 0, toX: this.canvas.offsetWidth, diameter: 3, alphaMax: 0.4, areaHeight: .5, color: '#0cdbf3', fill: false }, 
-            {id: 'medium', count: 100, fromX: 0, toX: this.canvas.offsetWidth, diameter: 8, alphaMax: 0.3, areaHeight: 1, color: '#6fd2f3', fill: true }, 
-            {id: 'large', count: 10, fromX: 0, toX: this.canvas.offsetWidth, diameter: 30, alphaMax: 0.2, areaHeight: 1, color: '#93e9f3', fill: true }
+            {id: 'small', count: 300, fromX: 0, toX: this.width, diameter: 3, alphaMax: 0.4, areaHeight: .5, color: '#0cdbf3', fill: false }, 
+            {id: 'medium', count: 100, fromX: 0, toX: this.width, diameter: 8, alphaMax: 0.3, areaHeight: 1, color: '#6fd2f3', fill: true }, 
+            {id: 'large', count: 10, fromX: 0, toX: this.width, diameter: 30, alphaMax: 0.2, areaHeight: 1, color: '#93e9f3', fill: true }
         ];
 		this.lights = [
             { width: 400, height: 100, alpha: 0.6, offsetX: 0, offsetY: 0, color: '#6ac6e8', initX: 0, initY: 0 }, 
@@ -97,8 +101,8 @@ class ParticleEngine {
             shape.graphics.beginFill(light.color).drawEllipse(0, 0, light.width, light.height);
             shape.regX = light.width / 2;
             shape.regY = light.height / 2;
-            shape.x = light.initX = light.width / 2 + light.offsetX;
-            shape.y = light.initY = light.height / 2 + light.offsetY;
+            shape.x = light.initX = this.width / 2 + light.offsetX;
+            shape.y = light.initY = this.height / 2 + light.offsetY;
 
             const filter = new createjs.BlurFilter(light.width, light.height, 1);
             const bounds = filter.getBounds();
@@ -135,10 +139,10 @@ class ParticleEngine {
                 yoyo: true,
                 repeat: -1,
                 ease: Power1.easeInOut,
-                scaleY: 2,
                 scaleX: 2,
-                y: this.canvas.offsetHeight / 2 - 50,
-                x: this.canvas.offsetWidth / 2 + 100
+                scaleY: 2,
+                x: this.width / 2 + 100,
+                y: this.height / 2 - 50
             });
         }
 
@@ -152,10 +156,10 @@ class ParticleEngine {
                 yoyo: true,
                 repeat: -1,
                 ease: Power1.easeInOut,
-                scaleY: 1.5,
                 scaleX: 1.5,
-                y: this.canvas.offsetHeight / 2,
-                x: this.canvas.offsetWidth / 2 - 200
+                scaleY: 1.5,
+                x: this.width / 2 - 200,
+                y: this.height / 2
             });
         }
     }
@@ -177,8 +181,8 @@ class ParticleEngine {
 
                 const xRangeStart = settings.fromX + (settings.toX - settings.fromX) / 4;
                 const xRangeEnd = settings.fromX + (settings.toX - settings.fromX) * 3 / 4;
-                const yRangeStart = this.canvas.offsetHeight * (2 - settings.areaHeight / 2) / 4;
-                const yRangeEnd = this.canvas.offsetHeight * (2 + settings.areaHeight / 2) / 4;
+                const yRangeStart = this.height * (2 - settings.areaHeight / 2) / 4;
+                const yRangeEnd = this.height * (2 + settings.areaHeight / 2) / 4;
                 const particle: Particle = {
                     shape: shape,
                     alphaMax: settings.alphaMax,
@@ -187,7 +191,7 @@ class ParticleEngine {
                     flag: settings.id,
                     speed: range(2, 10),
                     initX: weightedRange(settings.fromX, settings.toX, 1, xRangeStart, xRangeEnd, 0.6),
-                    initY: weightedRange(0, this.canvas.offsetWidth, 1, yRangeStart, yRangeEnd, 0.8 ),
+                    initY: weightedRange(0, this.width, 1, yRangeStart, yRangeEnd, 0.8 ),
                     areaHeight: settings.areaHeight
                 }
 
@@ -199,8 +203,8 @@ class ParticleEngine {
                 shape.scaleY = scale;
 
                 this.stage.addChild(shape);
-                this.particles.push(particle);
                 this.animateParticle(particle);
+                this.particles.push(particle);
             }
         });
     }
@@ -209,20 +213,21 @@ class ParticleEngine {
     {
         const xRangeStart = positionX + (totalWidth - positionX) / 4;
         const xRangeEnd = positionX + (totalWidth - positionX) * 3 / 4;
-        const yRangeStart = this.canvas.offsetHeight * (2 - areaHeight / 2) / 4;
-        const yRangeEnd = this.canvas.offsetHeight * (2 + areaHeight / 2) / 4;
+        const yRangeStart = this.height * (2 - areaHeight / 2) / 4;
+        const yRangeEnd = this.height * (2 + areaHeight / 2) / 4;
         
         particle.speed = range(1, 3);
         particle.initX = weightedRange(positionX, totalWidth, 1, xRangeStart, xRangeEnd, 0.6);
-        particle.initY = weightedRange(0, this.canvas.offsetWidth, 1, yRangeStart, yRangeEnd, 0.8);
+        particle.initY = weightedRange(0, this.width, 1, yRangeStart, yRangeEnd, 0.8);
     }
 
     private animateParticle(particle: Particle) {
-        var scale = range(0.3, 1);
-        var x = range(particle.initX - particle.distance, particle.initX + particle.distance);
-        var y = range(particle.initY - particle.distance, particle.initY + particle.distance);
-        gsap.to(particle, { duration: particle.speed, scaleX: scale, scaleY: scale, x: x, y: y, onComplete: this.animateParticle, onCompleteParams: [ particle ], ease: Cubic.easeInOut });	
-        gsap.to(particle, { duration: particle.speed / 2, alpha: range(0.1, particle.alphaMax), onComplete: this.fadeout, onCompleteParams: [ particle, particle.speed ] });	
+        const speed = particle.speed;
+        const scale = range(0.3, 1);
+        const x = range(particle.initX - particle.distance, particle.initX + particle.distance);
+        const y = range(particle.initY - particle.distance, particle.initY + particle.distance);
+        gsap.to(particle, { duration: speed, scaleX: scale, scaleY: scale, x: x, y: y, onComplete: this.animateParticle, onCompleteParams: [ particle ], ease: Cubic.easeInOut });	
+        gsap.to(particle, { duration: speed / 2, alpha: range(0.1, particle.alphaMax), onComplete: this.fadeout, onCompleteParams: [ particle, speed ] });	
     }
 
     private fadeout(particle: Particle, speed: number)
@@ -236,15 +241,17 @@ class ParticleEngine {
     }
 
     public resize() {
+        this.width = this.canvas.width = this.canvas.offsetWidth;
+        this.height = this.canvas.height = this.canvas.offsetHeight;
 		this.render();
 
         this.particles.forEach(particle => {
-            this.applySettings(particle, 0, this.canvas.offsetWidth, particle.areaHeight);
+            this.applySettings(particle, 0, this.width, particle.areaHeight);
         });
 
         this.lights.forEach((light) => {
-            light.initX = this.canvas.offsetWidth / 2 + light.offsetX;
-            light.initY = this.canvas.offsetHeight / 2 + light.offsetY;
+            light.initX = this.width / 2 + light.offsetX;
+            light.initY = this.height / 2 + light.offsetY;
 
             if (light.element) {
                 gsap.to(light.element, { duration: .5, x: light.initX, y: light.initY });
