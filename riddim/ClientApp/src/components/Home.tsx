@@ -2,7 +2,6 @@ import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Header, HeaderTitle, MenuLayout } from '../ui/HeaderComponents';
 import { HeroSvg, HeroWrapper, SeoHeader } from '../ui/HeroComponents';
-import HeroAnimation from './HeroAnimation';
 import RoomList from './RoomList';
 
 const Home: FC = () => {
@@ -10,7 +9,6 @@ const Home: FC = () => {
         <div>
             <SeoHeader>Riddim</SeoHeader>
             <HeroWrapper>
-                <HeroAnimation/>
                 <HeroSvg viewBox="0 0 800 180">
                     <text textAnchor="middle" fill="#fff4d8" x="400" y="130">riddim</text>
                 </HeroSvg>

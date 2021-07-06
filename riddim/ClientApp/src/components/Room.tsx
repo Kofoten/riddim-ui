@@ -4,6 +4,7 @@ import { RouteComponentProps } from 'react-router';
 import { ApplicationDispatch } from '../store';
 import * as RoomStore from '../store/RoomStore';
 import LoadingAnimation from './LoadingAnimation';
+import Player from './Player';
 
 const Room: FC<RouteComponentProps<{ slug: string }>> = (props) => {
     const roomId = useSelector(RoomStore.selectors.slugLookup)[props.match.params.slug];
@@ -27,7 +28,7 @@ const Room: FC<RouteComponentProps<{ slug: string }>> = (props) => {
                     case 'COMPLETE':
                         return <>
                             <h1>{room.data.name}</h1>
-
+                            <Player imageUrl={room.data.imageUrl}/>
                         </>
                     case 'ERROR':
                         return <p>{room.error.message}</p>

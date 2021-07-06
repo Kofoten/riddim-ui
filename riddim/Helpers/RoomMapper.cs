@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Riddim.Helpers
 {
-    public static class RoomHelper
+    public static class RoomMapper
     {
         public static readonly Expression<Func<Room, RoomView>> ToViewConverterExpression = (room) => new RoomView
         {

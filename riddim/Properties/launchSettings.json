@@ -19,7 +19,8 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "RIDDIM_DB_CONNECTION_STRING": "Host=localhost;Port=25432;Database=postgres;User ID=postgres;Password=sten123"
       },
       "applicationUrl": "http://localhost:5000"
     },

@@ -30,9 +30,10 @@ namespace Riddim.Controllers
         {
             var rooms = await context.Rooms
                 .Where(x => string.IsNullOrEmpty(query.Search) || x.Name.Contains(query.Search))
+                .OrderBy(x => x.Name)
                 .Skip(query.Page * query.PageSize)
                 .Take(query.PageSize + 1)
-                .Select(RoomHelper.ToViewConverterExpression)
+                .Select(RoomMapper.ToViewConverterExpression)
                 .ToListAsync();
 
             return Ok(new PageResult<RoomView>()
@@ -77,7 +78,7 @@ namespace Riddim.Controllers
                 return NotFound(ErrorObject.RoomNotFound);
             }
 
-            return Ok(RoomHelper.ToView(room));
+            return Ok(RoomMapper.ToView(room));
         }
 
         private async Task<ActionResult<RoomView>> GetBySlug(string slug)
@@ -91,7 +92,7 @@ namespace Riddim.Controllers
                 return NotFound(ErrorObject.RoomNotFound);
             }
 
-            return Ok(RoomHelper.ToView(roomSlug.Room, roomSlug.Slug));
+            return Ok(RoomMapper.ToView(roomSlug.Room, roomSlug.Slug));
         }
 
         [HttpPost]
@@ -137,7 +138,7 @@ namespace Riddim.Controllers
                 return Conflict(CreateUniqueConstraintViolationErrorObject(e));
             }
 
-            return Ok(RoomHelper.ToView(room.Entity));
+            return Ok(RoomMapper.ToView(room.Entity));
         }
 
         [HttpPatch]
@@ -216,7 +217,7 @@ namespace Riddim.Controllers
                 return Conflict(CreateUniqueConstraintViolationErrorObject(e));
             }
 
-            return Ok(RoomHelper.ToView(room));
+            return Ok(RoomMapper.ToView(room));
         }
 
         [HttpDelete]

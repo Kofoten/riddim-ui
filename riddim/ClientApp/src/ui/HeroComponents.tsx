@@ -10,7 +10,7 @@ export const HeroWrapper = styled.div`
     padding: 0;
     margin: 0;
     overflow: hidden;
-    background-color: #000;
+    background-color: ${props => props.theme.secondary};
     font-family: 'Bungee Inline', cursive;
 `
 
@@ -20,12 +20,4 @@ export const HeroSvg = styled.svg`
     max-width: 800px;
     margin: 0 auto;
     font-size: 10em;
-`
-
-export const HeroAnimationLayout = styled.canvas`
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 180px;
 `

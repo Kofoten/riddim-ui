@@ -8,7 +8,7 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import Global from './ui/Global';
 import { ThemeProvider } from 'styled-components';
-import { green } from './theme/theme';
+import { dark } from './theme/theme';
 
 // Create browser history to use in the Redux store
 const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href') as string;
@@ -19,7 +19,7 @@ const store = configureStore(history);
 
 ReactDOM.render(
     <Provider store={store}>
-        <ThemeProvider theme={green}>
+        <ThemeProvider theme={dark}>
             <Global />
             <ConnectedRouter history={history}>
                 <App />

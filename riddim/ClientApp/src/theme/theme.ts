@@ -6,6 +6,14 @@
     exclaim: string
 }
 
+export const dark: Theme = {
+    primary: '#7b766c',
+    variant: '#f2d49e',
+    secondary: '#2c2c2c',
+    accent: '#3d3d3d',
+    exclaim: '#e24228'
+}
+
 export const green: Theme = {
     primary: '#5400d0',
     variant: '#af02f7',
