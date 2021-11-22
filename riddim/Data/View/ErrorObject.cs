@@ -1,6 +1,6 @@
 ﻿namespace Riddim.Data.View
 {
-    public class ErrorObject
+    public record ErrorObject
     {
         public string Code { get; init; }
         public string Description { get; init; }

@@ -4,6 +4,7 @@ import jsonFetch from '../common/jsonFetch';
 import PagedSearchQuery from '../common/pagedSearchQuery';
 import { converToQueryString } from '../common/queryHelper';
 import { ReduxFetchState } from '../common/reduxFetchState';
+import { Token } from '../common/token';
 import PageResult from '../entities/pageResult';
 import Room, { RoomUpdate } from '../entities/room';
 
@@ -31,6 +32,23 @@ const INITIAL_STATE: RoomState = {
     status: 'NONE',
     roomCache: {},
     slugLookup: {}
+}
+
+// HELPERS
+const getAuthorizationHeader = (): { Authorization: string } => {
+    const tokenCacheString = window.sessionStorage.getItem('riddim_token');
+
+    if (!tokenCacheString) {
+        throw new Error('Not logged in');
+    }
+
+    const tokenCache = JSON.parse(tokenCacheString) as Token;
+    const now = Date.now() / 1000 | 0;
+    if (tokenCache.expiresAt < now) {
+        throw new Error('"Session" expired');
+    }
+
+    return { Authorization: `Bearer ${tokenCache.idToken}` };
 }
 
 // ACTION CREATORS
@@ -83,6 +101,7 @@ export const actionCreators = {
             var response = await jsonFetch<Room>(`${window.location.origin}/api/room`, {
                 method: 'POST',
                 headers: {
+                    ...getAuthorizationHeader(),
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
@@ -99,6 +118,7 @@ export const actionCreators = {
             var response = await jsonFetch<Room>(`${window.location.origin}/api/room/${id}`, {
                 method: 'PATCH',
                 headers: {
+                    ...getAuthorizationHeader(),
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)

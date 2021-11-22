@@ -1,7 +1,5 @@
-﻿using Riddim.Data.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Riddim.Data.View
 {

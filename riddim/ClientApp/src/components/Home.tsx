@@ -17,6 +17,7 @@ const Home: FC = () => {
                 <HeaderTitle>Rooms</HeaderTitle>
                 <MenuLayout>
                     <Link to="/room/create">Create</Link>
+                    <Link to="/auth/login">Login</Link>
                 </MenuLayout>
             </Header>
             <RoomList/>

@@ -20,6 +20,24 @@ export const PlayerButton = styled.div`
     margin: 0;
 `
 
+export const PlayerPausedBorder = styled.div`
+    border-radius: 50%;
+    border: 36px solid ${props => props.theme.primary};
+    color: ${props => props.theme.primary};
+    padding-left: 36px;
+    padding-top: 18px;
+    width: 400px;
+    height: 400px;
+    &:hover {
+        border: 36px solid ${props => props.theme.variant};
+        color: ${props => props.theme.variant};
+    }
+    &:active {
+        border: 36px solid ${props => props.theme.exclaim};
+        color: ${props => props.theme.exclaim};
+    }
+`
+
 export const PlayerPlayingImage = styled.img`
     border-radius: 50%;
     width: 400px;

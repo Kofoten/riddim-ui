@@ -1,4 +1,5 @@
 ﻿using EntityFramework.Exceptions.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -14,8 +15,8 @@ using System.Threading.Tasks;
 
 namespace Riddim.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/room")]
     public class RoomController : ControllerBase
     {
         private readonly RiddimDbContext context;
@@ -45,8 +46,7 @@ namespace Riddim.Controllers
             });
         }
 
-        [HttpGet]
-        [Route("{key}")]
+        [HttpGet("{key}")]
         public async Task<ActionResult<RoomView>> Get([FromRoute] string key, [FromQuery] string keyType)
         {
             if (string.IsNullOrEmpty(keyType))
@@ -95,6 +95,7 @@ namespace Riddim.Controllers
             return Ok(RoomMapper.ToView(roomSlug.Room, roomSlug.Slug));
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<RoomView>> Create([FromBody] RoomUpdate roomUpdate)
         {
@@ -141,8 +142,8 @@ namespace Riddim.Controllers
             return Ok(RoomMapper.ToView(room.Entity));
         }
 
-        [HttpPatch]
-        [Route("{id}")]
+        [Authorize]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<RoomView>> Update([FromRoute] Guid id, [FromBody] RoomUpdate roomUpdate)
         {
             var room = await context.Rooms.FindAsync(id);
@@ -220,8 +221,8 @@ namespace Riddim.Controllers
             return Ok(RoomMapper.ToView(room));
         }
 
-        [HttpDelete]
-        [Route("{id}")]
+        [Authorize]
+        [HttpDelete("{id}")]
         public async Task<ActionResult<RoomView>> Delete([FromRoute] Guid id)
         {
             var room = await context.Rooms.FindAsync(id);
