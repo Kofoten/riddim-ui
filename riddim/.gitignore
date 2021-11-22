@@ -10,6 +10,7 @@
 # Appsettings
 appsettings.json
 appsettings.Development.json
+Properties/launchSettings.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
